@@ -12,6 +12,10 @@ import java.util.HashMap;
 import java.util.ArrayList;
 import java.util.stream.Collectors;
 
+import static org.ex.DataType.INT_LINE;
+import static org.ex.DataType.FLOAT_LINE;
+import static org.ex.DataType.STRING_LINE;
+
 public final class Filter {
     private Filter() {
     }
@@ -21,7 +25,7 @@ public final class Filter {
      * cash reduce write on the disk operation
      * CASH_SIZE is line count to write
      */
-    private static Map<String, List<String>> lineCash = new HashMap<>();
+    private static Map<DataType, List<String>> lineCash = new HashMap<>();
 
     private static final int CASH_SIZE = 5;
 
@@ -38,18 +42,30 @@ public final class Filter {
         try (BufferedReader reader =
                      new BufferedReader(new FileReader(filePath))) {
 
-            lineCash.put("int", new ArrayList<>());
-            lineCash.put("real", new ArrayList<>());
-            lineCash.put("string", new ArrayList<>());
+            lineCash.put(INT_LINE, new ArrayList<>());
+            lineCash.put(FLOAT_LINE, new ArrayList<>());
+            lineCash.put(STRING_LINE, new ArrayList<>());
 
             String line;
-            String lineType;
-
+            DataType lineType;
+            int cashCounter = 0;
             while ((line = reader.readLine()) != null) {
                 lineType = getLineType(line);
                 lineCash.get(lineType).add(line);
+                cashCounter++;
+                if (cashCounter == CASH_SIZE) {
+                    writeProcessedDataCash();
+                    cashCounter = 0;
+                }
             }
-            writeProcessedData();
+            //check cash flush
+            int count = lineCash.values().stream()
+                    .mapToInt(List::size)
+                    .sum();
+            if (count > 0) {
+                writeProcessedDataCash();
+            }
+
         } catch (IOException e) {
             //TODO перехватить и обработать ошибки, записать имеющиеся данные
             e.printStackTrace();
@@ -57,28 +73,38 @@ public final class Filter {
         return "File has been read";
     }
 
-    private static void writeProcessedData() throws IOException {
-        String writeDir = System.getProperty("user.dir");
-        String fileName = "strings.txt";
-        String filePath = writeDir + System.getProperty("file.separator") + fileName;
-        boolean append = true;
+    private static void writeProcessedDataCash() throws IOException {
         lineCash.forEach((type, line) -> {
-            String data = line.stream()
-                    .collect(Collectors.joining(System.lineSeparator()));
-            try (BufferedWriter writer = new BufferedWriter(new FileWriter(filePath, append))) {
-                writer.write(data);
-            } catch (IOException e) {
-                System.out.println("Ошибка при записи файла: " + e.getMessage());
+            if (!line.isEmpty()) {
+                String data = line.stream()
+                        .collect(Collectors.joining(System.lineSeparator()));
+                writeData(data, type);
+                //clear cash
+                lineCash.get(type).clear();
             }
         });
     }
 
-    private static String getLineType(String line) {
-        String type = isInt(line) ? "int"
+    private static void writeData(String data, DataType type) {
+        String writeDir = System.getProperty("user.dir");
+        String fileName = type.getBaseFileName();
+        String filePath = writeDir + System.getProperty("file.separator") + App.getFileNamePrefix() + fileName;
+        boolean append = true;
+        if (data.length() > 0) {
+            try (BufferedWriter writer = new BufferedWriter(new FileWriter(filePath, append))) {
+                writer.write(data);
+            } catch (IOException e) {
+                System.out.println("ER:Error writing file: " + e.getMessage());
+            }
+        }
+    }
+
+    private static DataType getLineType(String line) {
+        DataType type = isInt(line) ? INT_LINE
                 :
-                (isRealNum(line) ? "real"
+                (isRealNum(line) ? FLOAT_LINE
                         :
-                        "string");
+                        STRING_LINE);
         return type;
     }
 

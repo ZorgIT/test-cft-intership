@@ -42,6 +42,26 @@ public final class App implements Runnable {
             description = "Add prefix to filename", defaultValue = "")
     private static String fileNamePrefix;
 
+    public static String getOutputPath() {
+        return outputPath;
+    }
+
+    public static boolean isAppendStatus() {
+        return appendStatus;
+    }
+
+    public static boolean isShortReport() {
+        return shortReport;
+    }
+
+    public static boolean isFullReport() {
+        return fullReport;
+    }
+
+    public static String getFileNamePrefix() {
+        return fileNamePrefix;
+    }
+
     //test args for run in idea 'run --args="src/test/resources/in1.txt src/test/resources/in2.txt'"
     @Override
     public void run() {
