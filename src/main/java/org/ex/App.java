@@ -2,21 +2,18 @@ package org.ex;
 
 import picocli.CommandLine;
 
+import java.util.List;
+
 @CommandLine.Command(name = "typefilter", mixinStandardHelpOptions = true,
         version = "typefilter 1.0",
-        description = "get data from text file and extrude to separate file " +
-                "by datatype.")
+        description = "get data from text file and extrude to separate file "
+                + "by datatype.")
 public final class App implements Runnable {
     /**
-     * Picocli parameters
+     * Picocli parameters.
      */
-    @CommandLine.Parameters(index = "0",
-            description = "Path to the first file")
-    private static String filePath1;
-
-    @CommandLine.Parameters(index = "1",
-            description = "Path to the second file")
-    private static String filePath2;
+    @CommandLine.Parameters(description = "File Paths")
+    private List<String> filePaths;
     @CommandLine.Option(names = {"-h", "--help"}, usageHelp = true,
             description = "Show this help message and exit.")
     private boolean helpRequested;
@@ -25,10 +22,30 @@ public final class App implements Runnable {
             description = "Print version information and exit.")
     private boolean versionRequested;
 
+    @CommandLine.Option(names = "-o",
+            description = "Path to write output files")
+    private static String outputPath;
+
+    @CommandLine.Option(names = "-a",
+            description = "Appends data to file is existed", defaultValue = "false")
+    private static boolean appendStatus;
+
+    @CommandLine.Option(names = "-s",
+            description = "give short result report")
+    private static boolean shortReport;
+
+    @CommandLine.Option(names = "-f",
+            description = "give short result report", defaultValue = "false")
+    private static boolean fullReport;
+
+    @CommandLine.Option(names = "-p",
+            description = "Add prefix to filename", defaultValue = "")
+    private static String fileNamePrefix;
+
     //test args for run in idea 'run --args="src/test/resources/in1.txt src/test/resources/in2.txt'"
     @Override
     public void run() {
-        Filter.generate(filePath1, filePath2);
+        Filter.generate(filePaths);
     }
 
     public static void main(String[] args) {
