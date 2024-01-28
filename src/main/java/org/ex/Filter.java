@@ -18,7 +18,14 @@ import static org.ex.DataType.FLOAT_LINE;
 import static org.ex.DataType.STRING_LINE;
 
 public final class Filter {
-    private Filter() {
+
+    private static Map<DataType, Boolean> appendStatus;
+
+    static {
+        appendStatus = new HashMap<>();
+        appendStatus.put(INT_LINE, App.isAppendStatus());
+        appendStatus.put(FLOAT_LINE, App.isAppendStatus());
+        appendStatus.put(STRING_LINE, App.isAppendStatus());
     }
 
     /**
@@ -28,7 +35,10 @@ public final class Filter {
      */
     private static Map<DataType, List<String>> lineCash = new HashMap<>();
 
-    private static final int CASH_SIZE = 4;
+    private static final int CASH_SIZE = 100;
+
+    private Filter() {
+    }
 
     public static String filter() {
         System.out.println("Фильтрация данных");
@@ -36,7 +46,9 @@ public final class Filter {
     }
 
     public static void generate(final List<String> filePaths) {
-        filePaths.forEach(x -> readAndProcessData(x));
+        filePaths.forEach(x -> {
+            readAndProcessData(x);
+        });
     }
 
     public static String readAndProcessData(final String filePath) {
@@ -46,10 +58,13 @@ public final class Filter {
             lineCash.put(INT_LINE, new ArrayList<>());
             lineCash.put(FLOAT_LINE, new ArrayList<>());
             lineCash.put(STRING_LINE, new ArrayList<>());
-
             String line;
+
             int cashCounter = 0;
             while ((line = reader.readLine()) != null) {
+                if (line.isEmpty()) {
+                    continue;
+                }
                 lineCash.get(getLineType(line)).add(line);
                 cashCounter++;
                 if (cashCounter == CASH_SIZE) {
@@ -86,13 +101,13 @@ public final class Filter {
     }
 
     private static void writeData(String data, DataType type) {
-        String writeDir = System.getProperty("user.dir");
+        String writeDir = App.getOutputPath();
         String fileName = type.getBaseFileName();
         String filePath = writeDir + System.getProperty("file.separator") + App.getFileNamePrefix() + fileName;
-        boolean append = true;
         if (data.length() > 0) {
-            try (BufferedWriter writer = new BufferedWriter(new FileWriter(filePath, append))) {
+            try (BufferedWriter writer = new BufferedWriter(new FileWriter(filePath, appendStatus.get(type)))) {
                 writer.write(data);
+                appendStatus.put(type, true);
             } catch (IOException e) {
                 System.out.println("ER:Error writing file: " + e.getMessage());
             }

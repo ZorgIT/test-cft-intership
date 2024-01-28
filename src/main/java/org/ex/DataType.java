@@ -1,9 +1,9 @@
 package org.ex;
 
 public enum DataType {
-    FLOAT_LINE("_floats.txt"),
-    INT_LINE("_integers.txt"),
-    STRING_LINE("_strings.txt");
+    FLOAT_LINE("floats.txt"),
+    INT_LINE("integers.txt"),
+    STRING_LINE("strings.txt");
 
     private String baseFileName;
 

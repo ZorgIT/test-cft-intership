@@ -11,7 +11,7 @@
       <option name="taskNames">
         <list>
           <option value="run" />
-          <option value="--args=&quot;-a src/test/resources/in1.txt src/test/resources/in2.txt -s&quot;" />
+          <option value="--args=&quot;src/test/resources/in1.txt src/test/resources/in2.txt -s&quot;" />
         </list>
       </option>
       <option name="vmOptions" />

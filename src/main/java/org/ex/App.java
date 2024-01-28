@@ -6,11 +6,11 @@ import java.util.List;
 
 @CommandLine.Command(name = "typefilter", mixinStandardHelpOptions = true,
         version = "typefilter 1.0",
-        description = "get data from text file and extrude to separate file "
+        description = "Get data from text file and extrude to separate file "
                 + "by datatype.")
 public final class App implements Runnable {
     /**
-     * Picocli parameters.
+     * Picocli  annotated parameters.
      */
     @CommandLine.Parameters(description = "File Paths")
     private List<String> filePaths;
@@ -23,7 +23,7 @@ public final class App implements Runnable {
     private boolean versionRequested;
 
     @CommandLine.Option(names = "-o",
-            description = "Path to write output files")
+            description = "Path to write output files", defaultValue = "")
     private static String outputPath;
 
     @CommandLine.Option(names = "-a",
@@ -43,7 +43,7 @@ public final class App implements Runnable {
     private static String fileNamePrefix;
 
     public static String getOutputPath() {
-        return outputPath;
+        return outputPath.isEmpty() ? System.getProperty("user.dir") : outputPath;
     }
 
     public static boolean isAppendStatus() {
