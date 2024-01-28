@@ -21,6 +21,8 @@ public final class Filter {
 
     private static Map<DataType, Boolean> appendStatus;
 
+    private static Stats stats;
+
     static {
         appendStatus = new HashMap<>();
         appendStatus.put(INT_LINE, App.isAppendStatus());
@@ -30,22 +32,22 @@ public final class Filter {
 
     /**
      * Big data file can be processed.
-     * cash reduce write on the disk operation
-     * CASH_SIZE is line count to write
+     * cache reduce write operation to the disk
+     * CACHE_SIZE is line count to write
      */
-    private static Map<DataType, List<String>> lineCash = new HashMap<>();
+    private static Map<DataType, List<String>> lineCache = new HashMap<>();
 
-    private static final int CASH_SIZE = 100;
+    private static final int CACHE_SIZE = 100;
 
     private Filter() {
     }
 
-    public static String filter() {
-        System.out.println("Фильтрация данных");
-        return "";
+    public static void setStats(Stats stats) {
+        Filter.stats = stats;
     }
 
-    public static void generate(final List<String> filePaths) {
+    public static void generate(final List<String> filePaths, final Stats statsE) {
+        setStats(statsE);
         filePaths.forEach(x -> {
             readAndProcessData(x);
         });
@@ -55,29 +57,29 @@ public final class Filter {
         try (BufferedReader reader =
                      new BufferedReader(new FileReader(filePath))) {
 
-            lineCash.put(INT_LINE, new ArrayList<>());
-            lineCash.put(FLOAT_LINE, new ArrayList<>());
-            lineCash.put(STRING_LINE, new ArrayList<>());
+            lineCache.put(INT_LINE, new ArrayList<>());
+            lineCache.put(FLOAT_LINE, new ArrayList<>());
+            lineCache.put(STRING_LINE, new ArrayList<>());
             String line;
 
-            int cashCounter = 0;
+            int cacheCounter = 0;
             while ((line = reader.readLine()) != null) {
                 if (line.isEmpty()) {
                     continue;
                 }
-                lineCash.get(getLineType(line)).add(line);
-                cashCounter++;
-                if (cashCounter == CASH_SIZE) {
-                    writeProcessedDataCash();
-                    cashCounter = 0;
+                lineCache.get(getLineType(line)).add(line);
+                cacheCounter++;
+                if (cacheCounter == CACHE_SIZE) {
+                    writeProcessedDataCache();
+                    cacheCounter = 0;
                 }
             }
-            //check cash flush
-            int count = lineCash.values().stream()
+            //check cache flush
+            int count = lineCache.values().stream()
                     .mapToInt(List::size)
                     .sum();
             if (count > 0) {
-                writeProcessedDataCash();
+                writeProcessedDataCache();
             }
 
         } catch (IOException e) {
@@ -87,15 +89,16 @@ public final class Filter {
         return "File has been read";
     }
 
-    private static void writeProcessedDataCash() throws IOException {
-        lineCash.forEach((type, line) -> {
+    private static void writeProcessedDataCache() throws IOException {
+        lineCache.forEach((type, line) -> {
             String newLine = System.lineSeparator();
             if (!line.isEmpty()) {
                 String data = line.stream()
                         .collect(Collectors.joining(newLine)) + newLine;
                 writeData(data, type);
-                //clear cash
-                lineCash.get(type).clear();
+                stats.processRecord(type, line);
+                //clear cache
+                lineCache.get(type).clear();
             }
         });
     }

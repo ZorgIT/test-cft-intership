@@ -65,7 +65,9 @@ public final class App implements Runnable {
     //test args for run in idea 'run --args="src/test/resources/in1.txt src/test/resources/in2.txt'"
     @Override
     public void run() {
-        Filter.generate(filePaths);
+        Stats statistic = new Stats();
+        Filter.generate(filePaths, statistic);
+        statistic.showStats();
     }
 
     public static void main(String[] args) {
