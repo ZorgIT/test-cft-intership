@@ -6,6 +6,7 @@ import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.math.BigDecimal;
+import java.math.BigInteger;
 import java.util.List;
 import java.util.Map;
 import java.util.HashMap;
@@ -27,7 +28,7 @@ public final class Filter {
      */
     private static Map<DataType, List<String>> lineCash = new HashMap<>();
 
-    private static final int CASH_SIZE = 5;
+    private static final int CASH_SIZE = 4;
 
     public static String filter() {
         System.out.println("Фильтрация данных");
@@ -47,11 +48,9 @@ public final class Filter {
             lineCash.put(STRING_LINE, new ArrayList<>());
 
             String line;
-            DataType lineType;
             int cashCounter = 0;
             while ((line = reader.readLine()) != null) {
-                lineType = getLineType(line);
-                lineCash.get(lineType).add(line);
+                lineCash.get(getLineType(line)).add(line);
                 cashCounter++;
                 if (cashCounter == CASH_SIZE) {
                     writeProcessedDataCash();
@@ -75,9 +74,10 @@ public final class Filter {
 
     private static void writeProcessedDataCash() throws IOException {
         lineCash.forEach((type, line) -> {
+            String newLine = System.lineSeparator();
             if (!line.isEmpty()) {
                 String data = line.stream()
-                        .collect(Collectors.joining(System.lineSeparator()));
+                        .collect(Collectors.joining(newLine)) + newLine;
                 writeData(data, type);
                 //clear cash
                 lineCash.get(type).clear();
@@ -119,7 +119,7 @@ public final class Filter {
 
     private static boolean isInt(String line) {
         try {
-            Integer.parseInt(line);
+            new BigInteger(line);
             return true;
         } catch (NumberFormatException e) {
             return false;
