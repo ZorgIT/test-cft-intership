@@ -117,7 +117,7 @@ public final class Filter {
         }
     }
 
-    private static DataType getLineType(String line) {
+    static DataType getLineType(String line) {
         DataType type = isInt(line) ? INT_LINE
                 :
                 (isRealNum(line) ? FLOAT_LINE
