@@ -66,8 +66,13 @@ public final class App implements Runnable {
     @Override
     public void run() {
         Stats statistic = new Stats();
-        Filter.generate(filePaths, statistic);
-        statistic.showStats();
+
+        if (filePaths != null) {
+            Filter.generate(filePaths, statistic);
+            statistic.showStats();
+        } else {
+            System.out.println("invalid input, at least one file is required");
+        }
     }
 
     public static void main(String[] args) {
