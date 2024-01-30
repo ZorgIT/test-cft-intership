@@ -38,8 +38,13 @@
 
 ## Шаг1
 
-для установки make на Ubuntu\linux введите команду:
+Если у вас не установлена java 8:
 
+```bash
+sudo apt-get install openjdk-8-jdk
+```
+
+для установки make на Ubuntu\linux введите команду:
 ```bash
 sudo apt install make
 ```
@@ -70,6 +75,11 @@ make fast-start
 
 Все подготовлено, теперь вы можете использовать утилиту для работы <br>
 Тестовые файлы расположены в src/resources/test/ (in1.txt, in2.txt)
+
+Пример работы программы:
+```bash
+java -jar build/libs/typefilter-1.0.0.jar src/test/resources/in1.txt src/test/resources/in2.txt
+```
 
 вызов српавки по работе с программой ключ -h
 ```
