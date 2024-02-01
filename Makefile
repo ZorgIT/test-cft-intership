@@ -1,10 +1,14 @@
 .DEFAULT_GOAL := build-run
+.PHONY: build
 
-setup:
-	./gradlew wrapper --gradle-version 8.5
+fast-start:
+	./gradlew wrapper --gradle-version 8.5 clean build install
 
 clean:
 	./gradlew clean
+
+setup:
+	./gradlew wrapper --gradle-version 8.5
 
 build:
 	./gradlew clean build
@@ -32,5 +36,3 @@ check-deps:
 
 
 build-run: build run
-
-.PHONY: build
