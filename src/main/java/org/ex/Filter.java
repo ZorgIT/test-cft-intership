@@ -18,9 +18,16 @@ import static org.ex.DataType.FLOAT_LINE;
 import static org.ex.DataType.STRING_LINE;
 
 public final class Filter {
+    /**
+     * Big data file can be processed by buffered reader.
+     * a simple cache was developed instead of aa for educational purposes
+     * cache reduce write operation to the disk
+     * CACHE_SIZE is line count before write process started
+     */
 
     private static Map<DataType, Boolean> appendStatus;
-
+    private static Map<DataType, List<String>> lineCache = new HashMap<>();
+    private static final int CACHE_SIZE = 100;
     private static Stats stats;
 
     static {
@@ -30,14 +37,6 @@ public final class Filter {
         appendStatus.put(STRING_LINE, App.isAppendStatus());
     }
 
-    /**
-     * Big data file can be processed.
-     * cache reduce write operation to the disk
-     * CACHE_SIZE is line count to write
-     */
-    private static Map<DataType, List<String>> lineCache = new HashMap<>();
-
-    private static final int CACHE_SIZE = 100;
 
     private Filter() {
     }
@@ -49,11 +48,15 @@ public final class Filter {
     public static void generate(final List<String> filePaths, final Stats statsE) {
         setStats(statsE);
         filePaths.forEach(x -> {
-            readAndProcessData(x);
+            try {
+                readAndProcessData(x);
+            } catch (IOException e) {
+                System.out.println("Error reading file: " + x + "[" + e.getMessage() + "]");
+            }
         });
     }
 
-    public static String readAndProcessData(final String filePath) {
+    public static String readAndProcessData(final String filePath) throws IOException {
         try (BufferedReader reader =
                      new BufferedReader(new FileReader(filePath))) {
 
@@ -74,7 +77,7 @@ public final class Filter {
                     cacheCounter = 0;
                 }
             }
-            //check cache flush
+
             int count = lineCache.values().stream()
                     .mapToInt(List::size)
                     .sum();
@@ -90,17 +93,19 @@ public final class Filter {
     }
 
     private static void writeProcessedDataCache() throws IOException {
-        lineCache.forEach((type, line) -> {
+        for (Map.Entry<DataType, List<String>> entry : lineCache.entrySet()) {
+            DataType type = entry.getKey();
+            List<String> line = entry.getValue();
+
             String newLine = System.lineSeparator();
             if (!line.isEmpty()) {
                 String data = line.stream()
                         .collect(Collectors.joining(newLine)) + newLine;
                 writeData(data, type);
                 stats.processRecord(type, line);
-                //clear cache
-                lineCache.get(type).clear();
+                line.clear(); // clear cache
             }
-        });
+        }
     }
 
     private static void writeData(String data, DataType type) {
@@ -112,17 +117,14 @@ public final class Filter {
                 writer.write(data);
                 appendStatus.put(type, true);
             } catch (IOException e) {
-                System.out.println("ER:Error writing file: " + e.getMessage());
+                System.out.println("Error writing file: " + e.getMessage());
             }
         }
     }
 
     static DataType getLineType(String line) {
-        DataType type = isInt(line) ? INT_LINE
-                :
-                (isRealNum(line) ? FLOAT_LINE
-                        :
-                        STRING_LINE);
+        DataType type = isInt(line) ? DataType.INT_LINE
+                : (isRealNum(line) ? DataType.FLOAT_LINE : DataType.STRING_LINE);
         return type;
     }
 

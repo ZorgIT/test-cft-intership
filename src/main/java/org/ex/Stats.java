@@ -40,19 +40,19 @@ public class Stats {
     public String getAndShowFull() {
         System.out.println("Numbers processed stats:");
         System.out.printf("Total: %d\n"
-                        + "minimal value is: %f\n"
-                        + "maximal value is: %f\n"
-                        + "summary value is: %f\n"
-                        + "average value is: %f\n",
+                        + "Minimal value: %.2f\n"
+                        + "Maximal value: %.2f\n"
+                        + "Summary value: %.2f\n"
+                        + "Average value: %.2f\n",
                 getNumCounter(), getNumMin(), getNumMax(), getNumSum(), getNumAverage());
         System.out.println("=======================");
         System.out.println("String processed stats:");
         System.out.printf("Total: %d\n"
-                        + "minimal length is: %s\n"
-                        + "maximal length is: %s\n",
+                        + "Minimal length: %s\n"
+                        + "Maximal length: %s\n",
                 getStrCounter(), getMinLength(), getMaxLength());
         //:TODO собрать возврат, определить форматтер отображения
-        return "result print completed";
+        return "Result print completed";
     }
 
     public void processRecord(DataType type, final List<String> rawRecords) {

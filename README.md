@@ -80,6 +80,7 @@ make fast-start
 
 ```bash
 cd test-cft-intership
+chmod +x gradlew
 make fast-start
 ```
 
