@@ -68,8 +68,12 @@ public final class App implements Runnable {
         Stats statistic = new Stats();
 
         if (filePaths != null) {
-            Filter.generate(filePaths, statistic);
-            statistic.showStats();
+            try {
+                Filter.generate(filePaths, statistic);
+                statistic.showStats();
+            } catch (Exception e) {
+                System.out.println("Error: " + e.getMessage());
+            }
         } else {
             System.out.println("invalid input, at least one file is required");
         }
